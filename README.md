@@ -1,73 +1,67 @@
-# React + TypeScript + Vite
+# Motion Mechanics Investment Simulator
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**A financial modeling tool for the first physical planet of the [Purrfect Universe](https://purrfecthq.com).**
 
-Currently, two official plugins are available:
+This application provides a transparent, legally compliant investment simulation for potential investors (Seed 2) and founders (Seed 0). It strictly adheres to the **Purrfect Universe Constitution**, specifically **Article IX-B (Profit Redistribution)**, ensuring that all financial projections reflect the ethical and community-driven values of the organization.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Key Features
 
-## React Compiler
+### 1. Dynamic Financial Projections
+*   **Operational Scenarios**: Toggle between "Baseline", "Conservative", and "Optimistic" operational tiers.
+*   **Growth Simulation**: A "Realistic Growth" mode that averages returns over a 5-year trajectory (MVP -> Stable -> Growth).
+*   **ROI Metrics**: Real-time calculation of Monthly Share, Annual Return, and Break-even points.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### 2. Constitution Compliance
+*   **5% Profit Cap**: The calculator automatically applies a strict 5% cap on net profit. Anything above this cap is classified as **Surplus**.
+*   **Surplus Redistribution**: Granular visualization of how surplus is distributed:
+    *   **Employees**: 30%
+    *   **External Investors**: 15%
+    *   **Sweat Equity**: 15%
+    *   **Founders**: 10%
+    *   **Treasury**: 10%
+    *   **Community**: 10%
+    *   **Reserves**: 10%
 
-## Expanding the ESLint configuration
+### 3. Founder vs. Investor Context
+*   **Dynamic Explainer**: The UI adapts its language and explanations based on the selected role:
+    *   **Founders**: Highlights "Sweat Risk" (high initial risk, capped returns).
+    *   **Investors**: Highlights "Growth Fuel" (lower risk, uncapped returns).
+*   **Transparency**: Clear, side-by-side comparison of the Risk/Reward profiles for all stakeholders.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Technology Stack
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+*   **Frontend**: React (TypeScript) + Vite
+*   **Styling**: Tailwind CSS
+*   **Visualization**: Recharts (for valuation graphs), Custom Progress Bars
+*   **Icons**: Lucide-React
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## Getting Started
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+1.  **Install dependencies**:
+    ```bash
+    npm install
+    ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+2.  **Run the development server**:
+    ```bash
+    npm run dev
+    ```
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+3.  **Build for production**:
+    ```bash
+    npm run build
+    ```
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## Project Structure
+
+*   `src/lib/calculator.ts`: Core financial logic, including the Profit Cap and Surplus formulas.
+*   `src/data/constants.ts`: Configuration for percentage shares (Article IX-B) and operational tiers.
+*   `src/components/Calculator.tsx`: Main simulator container.
+*   `src/components/DistributionBreakdown.tsx`: Visual component for the surplus redistribution.
+*   `src/components/ConstitutionExplainer.tsx`: Dynamic text component for the Founder/Investor comparison.
+
+## Documentation
+
+For a deeper dive into the governance and financial rules, refer to the `docs/` folder:
+*   `Constitution of Purrfect Universe.md`
+*   `Article IX-B — Profit Redistribution.md`
