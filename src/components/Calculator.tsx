@@ -9,28 +9,49 @@ import { Info, Sparkles } from "lucide-react";
 import { DistributionBreakdown } from "./DistributionBreakdown";
 import { ConstitutionExplainer } from "./ConstitutionExplainer";
 
+import { FINANCIAL_CONSTANTS } from "../data/constants";
+
 export function Calculator() {
     const [investment, setInvestment] = useState<number>(100000);
     const [investorType, setInvestorType] = useState<"EXTERNAL" | "FOUNDER">("EXTERNAL");
     const [selectedTierId, setSelectedTierId] = useState<string>("tier-2"); // Default to Baseline
-    const [isFullSelfFunded, setIsFullSelfFunded] = useState<boolean>(false);
+
+    // Derived State: Founder Self-Funding Percentage
+    // Based on the Investment Amount relative to the MVP Funding Gap
+    const derivedSelfFundingPercentage = useMemo(() => {
+        if (investorType !== "FOUNDER") return 0;
+        const percentage = (investment / FINANCIAL_CONSTANTS.MVP_RUNWAY_COST) * 100;
+        return Math.min(100, Math.max(0, percentage));
+    }, [investment, investorType]);
+
+    // Round to nearest integer for cleaner display, but keep precision for tiers
+    const displayPercentage = Math.round(derivedSelfFundingPercentage);
 
     const isGrowthMode = selectedTierId === "growth";
+
+    const FUNDING_TIERS = [0, 1, 4, 9, 14, 24, 49, 51];
 
     // Derived state
     const selectedTier = TIERS.find(t => t.id === selectedTierId) || TIERS[0];
 
-    // Reset full self-funded if switching to External
-    if (investorType === "EXTERNAL" && isFullSelfFunded) {
-        setIsFullSelfFunded(false);
-    }
-
     const result = useMemo(() => {
         if (isGrowthMode) {
-            return calculateGrowthProjection(investment, investorType, isFullSelfFunded);
+            return calculateGrowthProjection(investment, investorType, derivedSelfFundingPercentage);
         }
-        return calculateInvestorReturn(investment, selectedTier, investorType, isFullSelfFunded);
-    }, [investment, selectedTier, investorType, isGrowthMode, isFullSelfFunded]);
+        return calculateInvestorReturn(investment, selectedTier, investorType, derivedSelfFundingPercentage);
+    }, [investment, selectedTier, investorType, isGrowthMode, derivedSelfFundingPercentage]);
+
+    const handleTierClick = (tierPercent: number) => {
+        const requiredInvestment = (FINANCIAL_CONSTANTS.MVP_RUNWAY_COST * tierPercent) / 100;
+        // If 0% tier, we strictly shouldn't force 0 investment if they want to be a "Standard" co-founder?
+        // Standard Co-Founder usually brings sweat + maybe nominal capital.
+        // If they click 0%, we set to a nominal amount or 0? 
+        // Let's set to 0. The input field allows them to override.
+        // Or better: The 0% tier button implies "I am not self-funding the gap".
+        // But the input field drives the percentage.
+        // So clicking 0% sets investment to 0? That might be weird if they just want to "reset".
+        setInvestment(Math.round(requiredInvestment));
+    };
 
     return (
         <div className="max-w-6xl mx-auto p-4 md:p-8 space-y-8">
@@ -121,28 +142,56 @@ export function Calculator() {
                         setInvestorType={setInvestorType}
                     />
 
-                    {/* Founder Sovereignty Toggle */}
+                    {/* Founder Sovereignty Tier Selector */}
                     {investorType === "FOUNDER" && (
-                        <div className="p-4 rounded-xl bg-yellow-500/10 border border-yellow-500/20">
-                            <label className="flex items-start gap-3 cursor-pointer group">
-                                <div className="relative flex items-center">
-                                    <input
-                                        type="checkbox"
-                                        className="peer sr-only"
-                                        checked={isFullSelfFunded}
-                                        onChange={(e) => setIsFullSelfFunded(e.target.checked)}
-                                    />
-                                    <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-yellow-800 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-yellow-500"></div>
-                                </div>
-                                <div className="grid gap-1">
-                                    <span className="font-medium text-white group-hover:text-yellow-400 transition-colors">
-                                        I am funding the MVP Runway myself
-                                    </span>
-                                    <p className="text-xs text-gray-400">
-                                        By covering the Seed 1 & 2 gap (~$7.95M), you retain 100% of the Equity rights (Founder + Investor pools).
-                                    </p>
-                                </div>
-                            </label>
+                        <div className="p-5 rounded-2xl bg-yellow-500/10 border border-yellow-500/20">
+                            <h3 className="text-sm font-semibold text-yellow-100 mb-3 uppercase tracking-wider flex items-center justify-between">
+                                <span>Self-Funding Level</span>
+                                <span className="text-yellow-400 font-bold">{Math.min(100, Number(derivedSelfFundingPercentage.toFixed(1)))}% of Gap</span>
+                            </h3>
+
+                            <div className="flex justify-between items-center gap-2 mb-2">
+                                {FUNDING_TIERS.map((tier) => {
+                                    // Highlight logic: Range based
+                                    // If exact match: highlight
+                                    // If manual input falls between tiers?
+                                    // Let's highlight the CLOSEST tier, or strictly the active one.
+                                    // User asked: "1 - 4 - 9..." tiered.
+                                    // If I type 30%, which one highlights? 24? 49?
+                                    // Simple logic: Highlight if strictly equal (from click) OR if within a small tolerance?
+                                    // Or simply highlight if `Math.round(displayPercentage) === tier`?
+                                    // Let's try highlighting if it's the "Active Range".
+                                    // Actually, simple exact match for the buttons is cleaner for "Preset" feel.
+                                    // But user typing 3,900,000 (which is 49.05%) should highlight 49%.
+                                    const isSelected = Math.abs(derivedSelfFundingPercentage - tier) < 0.5;
+
+                                    return (
+                                        <button
+                                            key={tier}
+                                            onClick={() => handleTierClick(tier)}
+                                            className={cn(
+                                                "flex-1 py-2 rounded-lg text-xs font-bold transition-all border",
+                                                isSelected
+                                                    ? "bg-yellow-500 text-black border-yellow-500 shadow-[0_0_15px_rgba(234,179,8,0.4)] scale-105"
+                                                    : "bg-black/40 text-gray-500 border-white/10 hover:border-yellow-500/50 hover:text-yellow-200"
+                                            )}
+                                        >
+                                            {tier}%
+                                        </button>
+                                    );
+                                })}
+                            </div>
+
+                            <p className="text-xs text-gray-400 mt-2">
+                                {displayPercentage <= 0
+                                    ? "Standard Co-Founder: No additional operational capital deployment."
+                                    : displayPercentage < 10
+                                        ? "Skin in the game: Contributing capital for immediate runway."
+                                        : displayPercentage < 25
+                                            ? "Significant Stewardship: Shouldering major operational risks."
+                                            : "Co-Pilot: Taking widely proportionate risk for the highest reward tier."
+                                }
+                            </p>
                         </div>
                     )}
 
@@ -159,7 +208,7 @@ export function Calculator() {
 
                 {/* Right Column: Visualization */}
                 <div className="lg:col-span-8 space-y-6">
-                    <ResultsCards result={result} />
+                    <ResultsCards result={result} investorType={investorType} />
 
 
 
@@ -214,7 +263,7 @@ export function Calculator() {
                             <Info className="w-5 h-5 text-gray-400" />
                             Understanding the Returns
                         </h3>
-                        <ConstitutionExplainer investorType={investorType} isFullSelfFunded={isFullSelfFunded} />
+                        <ConstitutionExplainer investorType={investorType} selfFundingPercentage={derivedSelfFundingPercentage} />
                     </div>
 
                     <ValuationChart

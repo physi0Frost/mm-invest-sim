@@ -17,6 +17,10 @@ export interface CalculationResult {
         community: number;
         reserves: number;
     };
+    breakdown: {
+        cash: number;
+        equity: number;
+    };
     isGrowthMode?: boolean;
     averageYield?: number;
 }
@@ -32,15 +36,55 @@ export const calculateSurplus = (tier: TierData, netProfit: number): number => {
 };
 
 export const calculateInvestorReturn = (
-    investmentAmount: number,
+    investment: number,
     tier: TierData,
-    investorType: "EXTERNAL" | "FOUNDER" | "EMPLOYEE" = "EXTERNAL",
-    isFullSelfFunded: boolean = false
+    investorType: "EXTERNAL" | "FOUNDER",
+    selfFundingPercentage: number = 0
 ): CalculationResult => {
-    const netProfit = calculateNetProfit(tier);
-    const surplus = calculateSurplus(tier, netProfit);
+    const revenue = tier.monthlyRevenue;
+    const payroll = tier.monthlyPayroll;
+    const opEx = FINANCIAL_CONSTANTS.MONTHLY_OPEX;
 
-    // Calculate total pool amounts (Annualized for distribution display)
+    // 1. Net Profit
+    const netProfit = revenue - (payroll + opEx);
+
+    // 2. Profit Cap (5% of Gross Revenue)
+    const profitCap = revenue * FINANCIAL_CONSTANTS.PROFIT_CAP_PERCENT;
+
+    // 3. Surplus
+    const surplus = Math.max(0, netProfit - profitCap);
+
+    // 4. Pool Configuration
+    let poolShareConfig = FINANCIAL_CONSTANTS.SURPLUS_SHARES.EXTERNAL_INVESTORS;
+    let totalPoolRequirement = FINANCIAL_CONSTANTS.FUNDING_GAP;
+
+    // Breakdown tracking
+    let baseSharePercent = 0;
+    let equitySharePercent = 0;
+
+    if (investorType === "FOUNDER") {
+        baseSharePercent = FINANCIAL_CONSTANTS.SURPLUS_SHARES.FOUNDERS;
+        equitySharePercent = FINANCIAL_CONSTANTS.SURPLUS_SHARES.EXTERNAL_INVESTORS * (selfFundingPercentage / 100);
+
+        poolShareConfig = baseSharePercent + equitySharePercent;
+        totalPoolRequirement = FINANCIAL_CONSTANTS.ALREADY_COMMITTED + (FINANCIAL_CONSTANTS.MVP_RUNWAY_COST * (selfFundingPercentage / 100));
+    } else {
+        baseSharePercent = FINANCIAL_CONSTANTS.SURPLUS_SHARES.EXTERNAL_INVESTORS;
+        equitySharePercent = 0;
+    }
+
+    // 5. Calculate ownership and shares
+    const totalPoolSurplusMonthly = surplus * poolShareConfig;
+    const ownershipPercentage = totalPoolRequirement > 0 ? Math.min(1, investment / totalPoolRequirement) : 0;
+
+    const investorShareMonth = totalPoolSurplusMonthly * ownershipPercentage;
+    const investorShareYear = investorShareMonth * 12;
+
+    // 6. ROI Metrics
+    const yearsToReturn = investorShareYear > 0 ? investment / investorShareYear : Infinity;
+    const roiYield = investment > 0 ? (investorShareYear / investment) * 100 : 0;
+
+    // 7. Distribution (Annual)
     const annualSurplus = surplus * 12;
     const distribution = {
         employees: annualSurplus * FINANCIAL_CONSTANTS.SURPLUS_SHARES.EMPLOYEES,
@@ -52,33 +96,15 @@ export const calculateInvestorReturn = (
         reserves: annualSurplus * FINANCIAL_CONSTANTS.SURPLUS_SHARES.RESERVES_DREAM,
     };
 
-    let poolShareConfig = FINANCIAL_CONSTANTS.SURPLUS_SHARES.EXTERNAL_INVESTORS;
-    let totalPoolRequirement = FINANCIAL_CONSTANTS.FUNDING_GAP;
+    // 8. Breakdown (Cash vs Equity for Founders)
+    const totalShare = baseSharePercent + equitySharePercent;
+    const cashRatio = totalShare > 0 ? baseSharePercent / totalShare : 1;
+    const equityRatio = totalShare > 0 ? equitySharePercent / totalShare : 0;
 
-    if (investorType === "FOUNDER") {
-        if (isFullSelfFunded) {
-            // Founder gets BOTH pools (10% Founder + 15% Investor = 25%)
-            poolShareConfig = FINANCIAL_CONSTANTS.SURPLUS_SHARES.FOUNDERS + FINANCIAL_CONSTANTS.SURPLUS_SHARES.EXTERNAL_INVESTORS;
-            // The "Pool" requirement effectively becomes the gap they chose to fill
-            totalPoolRequirement = FINANCIAL_CONSTANTS.MVP_RUNWAY_COST;
-        } else {
-            poolShareConfig = FINANCIAL_CONSTANTS.SURPLUS_SHARES.FOUNDERS;
-            totalPoolRequirement = FINANCIAL_CONSTANTS.ALREADY_COMMITTED;
-        }
-    }
-
-    // Total Surplus allocated to this POOL (Monthly)
-    const totalPoolSurplusMonthly = surplus * poolShareConfig;
-
-    // Investor's ownership of the pool
-    const ownershipPercentage = totalPoolRequirement > 0 ? investmentAmount / totalPoolRequirement : 0;
-
-    // Investor's share of the surplus
-    const investorShareMonth = totalPoolSurplusMonthly * ownershipPercentage;
-    const investorShareYear = investorShareMonth * 12;
-
-    const yearsToReturn = investorShareYear > 0 ? investmentAmount / investorShareYear : Infinity;
-    const roiYield = investorShareYear > 0 ? (investorShareYear / investmentAmount) * 100 : 0;
+    const breakdown = {
+        cash: investorShareYear * cashRatio,
+        equity: investorShareYear * equityRatio,
+    };
 
     return {
         netProfit,
@@ -88,13 +114,14 @@ export const calculateInvestorReturn = (
         yearsToReturn,
         roiYield,
         distribution,
+        breakdown,
     };
 };
 
 export const calculateGrowthProjection = (
     investmentAmount: number,
     investorType: "EXTERNAL" | "FOUNDER" = "EXTERNAL",
-    isFullSelfFunded: boolean = false
+    selfFundingPercentage: number = 0
 ): CalculationResult => {
     // Simulation: Year 1 (T0) -> Year 2 (T1) -> Year 3, 4, 5 (T2)
     const trajectory = ["tier-0", "tier-1", "tier-2", "tier-2", "tier-2"];
@@ -113,7 +140,7 @@ export const calculateGrowthProjection = (
 
     trajectory.forEach((tierId) => {
         const tier = TIERS.find((t) => t.id === tierId) || TIERS[0];
-        const result = calculateInvestorReturn(investmentAmount, tier, investorType, isFullSelfFunded);
+        const result = calculateInvestorReturn(investmentAmount, tier, investorType, selfFundingPercentage);
         totalShare5Years += result.investorShareYear;
         totalSurplus5Years += (result.surplus * 12);
 
@@ -144,6 +171,14 @@ export const calculateGrowthProjection = (
     const yearsToReturn = averageShareYear > 0 ? investmentAmount / averageShareYear : Infinity;
     const roiYield = averageShareYear > 0 ? (averageShareYear / investmentAmount) * 100 : 0;
 
+    // Calculate breakdown for growth mode
+    const foundersBase = FINANCIAL_CONSTANTS.SURPLUS_SHARES.FOUNDERS;
+    const investorShare = FINANCIAL_CONSTANTS.SURPLUS_SHARES.EXTERNAL_INVESTORS;
+    const equityPortion = investorShare * (selfFundingPercentage / 100);
+    const totalShare = (investorType === "FOUNDER") ? foundersBase + equityPortion : investorShare;
+    const cashRatio = totalShare > 0 ? ((investorType === "FOUNDER") ? foundersBase : investorShare) / totalShare : 1;
+    const equityRatio = (investorType === "FOUNDER" && totalShare > 0) ? equityPortion / totalShare : 0;
+
     return {
         netProfit: 0,
         surplus: averageSurplusYear / 12,
@@ -152,6 +187,10 @@ export const calculateGrowthProjection = (
         yearsToReturn,
         roiYield,
         distribution: averageDistribution,
+        breakdown: {
+            cash: averageShareYear * cashRatio,
+            equity: averageShareYear * equityRatio,
+        },
         isGrowthMode: true,
         averageYield: roiYield
     };

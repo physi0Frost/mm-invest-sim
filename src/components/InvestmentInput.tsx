@@ -18,7 +18,7 @@ export function InvestmentInput({
 }: InvestmentInputProps) {
     const maxInvestment = investorType === "EXTERNAL"
         ? FINANCIAL_CONSTANTS.FUNDING_GAP
-        : FINANCIAL_CONSTANTS.ALREADY_COMMITTED * 2; // Allow frounders to play with numbers
+        : FINANCIAL_CONSTANTS.FUNDING_GAP * 0.51; // Allow max 51% of total gap for Founders
 
     return (
         <div className={cn("p-6 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md", className)}>
