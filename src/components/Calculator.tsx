@@ -13,17 +13,24 @@ export function Calculator() {
     const [investment, setInvestment] = useState<number>(100000);
     const [investorType, setInvestorType] = useState<"EXTERNAL" | "FOUNDER">("EXTERNAL");
     const [selectedTierId, setSelectedTierId] = useState<string>("tier-2"); // Default to Baseline
+    const [isFullSelfFunded, setIsFullSelfFunded] = useState<boolean>(false);
+
     const isGrowthMode = selectedTierId === "growth";
 
     // Derived state
     const selectedTier = TIERS.find(t => t.id === selectedTierId) || TIERS[0];
 
+    // Reset full self-funded if switching to External
+    if (investorType === "EXTERNAL" && isFullSelfFunded) {
+        setIsFullSelfFunded(false);
+    }
+
     const result = useMemo(() => {
         if (isGrowthMode) {
-            return calculateGrowthProjection(investment, investorType);
+            return calculateGrowthProjection(investment, investorType, isFullSelfFunded);
         }
-        return calculateInvestorReturn(investment, selectedTier, investorType);
-    }, [investment, selectedTier, investorType, isGrowthMode]);
+        return calculateInvestorReturn(investment, selectedTier, investorType, isFullSelfFunded);
+    }, [investment, selectedTier, investorType, isGrowthMode, isFullSelfFunded]);
 
     return (
         <div className="max-w-6xl mx-auto p-4 md:p-8 space-y-8">
@@ -114,6 +121,31 @@ export function Calculator() {
                         setInvestorType={setInvestorType}
                     />
 
+                    {/* Founder Sovereignty Toggle */}
+                    {investorType === "FOUNDER" && (
+                        <div className="p-4 rounded-xl bg-yellow-500/10 border border-yellow-500/20">
+                            <label className="flex items-start gap-3 cursor-pointer group">
+                                <div className="relative flex items-center">
+                                    <input
+                                        type="checkbox"
+                                        className="peer sr-only"
+                                        checked={isFullSelfFunded}
+                                        onChange={(e) => setIsFullSelfFunded(e.target.checked)}
+                                    />
+                                    <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-yellow-800 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-yellow-500"></div>
+                                </div>
+                                <div className="grid gap-1">
+                                    <span className="font-medium text-white group-hover:text-yellow-400 transition-colors">
+                                        I am funding the MVP Runway myself
+                                    </span>
+                                    <p className="text-xs text-gray-400">
+                                        By covering the Seed 1 & 2 gap (~$7.95M), you retain 100% of the Equity rights (Founder + Investor pools).
+                                    </p>
+                                </div>
+                            </label>
+                        </div>
+                    )}
+
                     <div className="p-4 rounded-xl bg-blue-500/5 border border-blue-500/10 flex gap-3 items-start">
                         <Info className="w-5 h-5 text-blue-400 shrink-0 mt-0.5" />
                         <div className="space-y-2">
@@ -182,7 +214,7 @@ export function Calculator() {
                             <Info className="w-5 h-5 text-gray-400" />
                             Understanding the Returns
                         </h3>
-                        <ConstitutionExplainer investorType={investorType} />
+                        <ConstitutionExplainer investorType={investorType} isFullSelfFunded={isFullSelfFunded} />
                     </div>
 
                     <ValuationChart

@@ -34,7 +34,8 @@ export const calculateSurplus = (tier: TierData, netProfit: number): number => {
 export const calculateInvestorReturn = (
     investmentAmount: number,
     tier: TierData,
-    investorType: "EXTERNAL" | "FOUNDER" | "EMPLOYEE" = "EXTERNAL"
+    investorType: "EXTERNAL" | "FOUNDER" | "EMPLOYEE" = "EXTERNAL",
+    isFullSelfFunded: boolean = false
 ): CalculationResult => {
     const netProfit = calculateNetProfit(tier);
     const surplus = calculateSurplus(tier, netProfit);
@@ -55,8 +56,15 @@ export const calculateInvestorReturn = (
     let totalPoolRequirement = FINANCIAL_CONSTANTS.FUNDING_GAP;
 
     if (investorType === "FOUNDER") {
-        poolShareConfig = FINANCIAL_CONSTANTS.SURPLUS_SHARES.FOUNDERS;
-        totalPoolRequirement = FINANCIAL_CONSTANTS.ALREADY_COMMITTED;
+        if (isFullSelfFunded) {
+            // Founder gets BOTH pools (10% Founder + 15% Investor = 25%)
+            poolShareConfig = FINANCIAL_CONSTANTS.SURPLUS_SHARES.FOUNDERS + FINANCIAL_CONSTANTS.SURPLUS_SHARES.EXTERNAL_INVESTORS;
+            // The "Pool" requirement effectively becomes the gap they chose to fill
+            totalPoolRequirement = FINANCIAL_CONSTANTS.MVP_RUNWAY_COST;
+        } else {
+            poolShareConfig = FINANCIAL_CONSTANTS.SURPLUS_SHARES.FOUNDERS;
+            totalPoolRequirement = FINANCIAL_CONSTANTS.ALREADY_COMMITTED;
+        }
     }
 
     // Total Surplus allocated to this POOL (Monthly)
@@ -85,7 +93,8 @@ export const calculateInvestorReturn = (
 
 export const calculateGrowthProjection = (
     investmentAmount: number,
-    investorType: "EXTERNAL" | "FOUNDER" = "EXTERNAL"
+    investorType: "EXTERNAL" | "FOUNDER" = "EXTERNAL",
+    isFullSelfFunded: boolean = false
 ): CalculationResult => {
     // Simulation: Year 1 (T0) -> Year 2 (T1) -> Year 3, 4, 5 (T2)
     const trajectory = ["tier-0", "tier-1", "tier-2", "tier-2", "tier-2"];
@@ -104,7 +113,7 @@ export const calculateGrowthProjection = (
 
     trajectory.forEach((tierId) => {
         const tier = TIERS.find((t) => t.id === tierId) || TIERS[0];
-        const result = calculateInvestorReturn(investmentAmount, tier, investorType);
+        const result = calculateInvestorReturn(investmentAmount, tier, investorType, isFullSelfFunded);
         totalShare5Years += result.investorShareYear;
         totalSurplus5Years += (result.surplus * 12);
 

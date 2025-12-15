@@ -5,6 +5,7 @@ export const FINANCIAL_CONSTANTS = {
 
     // Funding Gap
     FUNDING_GAP: 7950000,
+    MVP_RUNWAY_COST: 7950000, // For "Self-Funded" scenario, we assume covering the full gap
 
     // Fixed Monthly OpEx
     MONTHLY_OPEX: 200000,
