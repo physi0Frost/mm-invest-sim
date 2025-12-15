@@ -7,6 +7,7 @@ import { calculateInvestorReturn, calculateGrowthProjection } from "../lib/calcu
 import { cn } from "../lib/utils";
 import { Info, Sparkles } from "lucide-react";
 import { DistributionBreakdown } from "./DistributionBreakdown";
+import { ConstitutionExplainer } from "./ConstitutionExplainer";
 
 export function Calculator() {
     const [investment, setInvestment] = useState<number>(100000);
@@ -36,7 +37,10 @@ export function Calculator() {
                     Motion Mechanics <span className="text-primary block md:inline">Investment Simulator</span>
                 </h1>
                 <p className="text-gray-400 max-w-2xl mx-auto text-lg">
-                    Project your returns, visualize growth, and align your capital with the mission of the first physical planet of the Purrfect Universe.
+                    {investorType === "FOUNDER"
+                        ? "Verify your stewardship, project your impact, and safeguard the mission."
+                        : "Project your returns, visualize growth, and align your capital with the mission of the first physical planet of the Purrfect Universe."
+                    }
                 </p>
             </div>
 
@@ -159,6 +163,15 @@ export function Calculator() {
                             distribution={result.distribution}
                             totalSurplusMonthly={result.surplus}
                         />
+                    </div>
+
+                    {/* NEW: Discrepancy Explainer */}
+                    <div className="space-y-4">
+                        <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                            <Info className="w-5 h-5 text-gray-400" />
+                            Understanding the Returns
+                        </h3>
+                        <ConstitutionExplainer investorType={investorType} />
                     </div>
 
                     <ValuationChart
