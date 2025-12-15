@@ -12,7 +12,7 @@ function App() {
               {/* PU Logo */}
               <div className="h-10 flex-shrink-0">
                 <img
-                  src="/assets/images/pu-logo-tp-wide.png"
+                  src="./assets/images/pu-logo-tp-wide.png"
                   alt="Purrfect Universe Logo"
                   className="h-10 w-auto"
                 />
@@ -21,7 +21,7 @@ function App() {
               {/* MM Logo */}
               <div className="h-10 flex-shrink-0">
                 <img
-                  src="/assets/images/mm-logo-tp-dark.png"
+                  src="./assets/images/mm-logo-tp-dark.png"
                   alt="Motion Mechanics Logo"
                   className="h-10 w-auto"
                 />
