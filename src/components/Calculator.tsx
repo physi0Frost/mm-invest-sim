@@ -57,12 +57,12 @@ export function Calculator() {
         <div className="max-w-6xl mx-auto p-4 md:p-8 space-y-8">
             {/* Header */}
             <div className="text-center space-y-4 mb-12">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-semibold tracking-wider uppercase">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-secondary/10 border border-brand-secondary/20 text-brand-secondary text-xs font-semibold tracking-wider uppercase">
                     <Sparkles className="w-3 h-3" />
                     Purrfect Universe Financials
                 </div>
                 <h1 className="text-4xl md:text-5xl font-black text-white tracking-tight">
-                    Motion Mechanics <span className="text-primary block md:inline">Investment Simulator</span>
+                    Motion Mechanics <span className="text-brand-base block md:inline">Investment Simulator</span>
                 </h1>
                 <p className="text-gray-400 max-w-2xl mx-auto text-lg">
                     {investorType === "FOUNDER"
@@ -76,14 +76,15 @@ export function Calculator() {
                 {/* Left Column: Controls */}
                 <div className="lg:col-span-4 space-y-6">
                     {/* Scenario Selector */}
-                    <div className="p-6 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md">
+                    <div className="p-6 rounded-2xl bg-gray-800/90 border border-gray-700">
                         <div className="flex justify-between items-center mb-4">
-                            <h3 className="text-sm font-semibold text-gray-300 uppercase tracking-wider">Operational Scenario</h3>
+                            <h3 className="text-sm font-semibold text-gray-200 uppercase tracking-wider">Operational Scenario</h3>
                             <a
                                 href="https://microsites.infra.purrfecthq.com/flextime/?h=747f34f9&lang=en"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-xs text-primary hover:text-primary/80 flex items-center gap-1 transition-colors"
+                                aria-label="View FlexTime Model Microsite"
+                                className="text-xs text-brand-highlight hover:text-brand-highlight-light flex items-center gap-1 transition-colors"
                             >
                                 <Sparkles className="w-3 h-3" />
                                 Model Microsite
@@ -94,20 +95,22 @@ export function Calculator() {
                                 <button
                                     key={tier.id}
                                     onClick={() => setSelectedTierId(tier.id)}
+                                    aria-pressed={selectedTierId === tier.id}
+                                    aria-label={`Select ${tier.name} scenario`}
                                     className={cn(
                                         "w-full text-left p-3 rounded-xl border transition-all duration-200",
                                         selectedTierId === tier.id
-                                            ? "bg-primary/20 border-primary/50 ring-1 ring-primary/50"
-                                            : "bg-black/20 border-transparent hover:bg-black/40 hover:border-white/10"
+                                            ? "bg-brand-base/30 border-brand-base text-white"
+                                            : "bg-gray-800/50 border-gray-700 hover:bg-gray-700/70 hover:border-gray-600 text-gray-300"
                                     )}
                                 >
                                     <div className="flex justify-between items-center mb-1">
-                                        <span className={cn("font-bold", selectedTierId === tier.id ? "text-white" : "text-gray-400")}>
+                                        <span className={cn("font-bold", selectedTierId === tier.id ? "text-white" : "text-gray-200")}>
                                             {tier.name}
                                         </span>
-                                        {selectedTierId === tier.id && <div className="w-2 h-2 rounded-full bg-primary shadow-[0_0_10px_hsl(var(--primary))]" />}
+                                        {selectedTierId === tier.id && <div className="w-2 h-2 rounded-full bg-brand-base shadow-[0_0_10px_rgba(22,122,66,0.8)]" />}
                                     </div>
-                                    <p className="text-xs text-gray-500 line-clamp-2">{tier.description}</p>
+                                    <p className="text-xs text-gray-400 line-clamp-2">{tier.description}</p>
                                 </button>
                             ))}
 
@@ -115,20 +118,22 @@ export function Calculator() {
 
                             <button
                                 onClick={() => setSelectedTierId("growth")}
+                                aria-pressed={selectedTierId === "growth"}
+                                aria-label="Select Realistic Growth 5 Year scenario"
                                 className={cn(
                                     "w-full text-left p-3 rounded-xl border transition-all duration-200",
                                     selectedTierId === "growth"
-                                        ? "bg-emerald-500/20 border-emerald-500/50 ring-1 ring-emerald-500/50"
-                                        : "bg-black/20 border-transparent hover:bg-black/40 hover:border-white/10"
+                                        ? "bg-emerald-500/30 border-emerald-500 text-white"
+                                        : "bg-gray-800/50 border-gray-700 hover:bg-gray-700/70 hover:border-gray-600 text-gray-300"
                                 )}
                             >
                                 <div className="flex justify-between items-center mb-1">
-                                    <span className={cn("font-bold", selectedTierId === "growth" ? "text-white" : "text-gray-400")}>
+                                    <span className={cn("font-bold", selectedTierId === "growth" ? "text-white" : "text-gray-200")}>
                                         Realistic Growth (5 Yr)
                                     </span>
                                     {selectedTierId === "growth" && <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_10px_#10b981]" />}
                                 </div>
-                                <p className="text-xs text-gray-500 line-clamp-2">
+                                <p className="text-xs text-gray-400 line-clamp-2">
                                     Simulates Year 1 (MVP) → Year 2 (Stable) → Year 3+ (Baseline). Returns are averaged.
                                 </p>
                             </button>
@@ -213,8 +218,8 @@ export function Calculator() {
 
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="p-6 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md flex flex-col justify-center">
-                            <h3 className="text-gray-400 text-sm font-medium mb-1">Projected Annual Surplus</h3>
+                        <div className="p-6 rounded-2xl bg-gray-800/90 border border-gray-700 flex flex-col justify-center">
+                            <h3 className="text-gray-300 text-sm font-medium mb-1">Projected Annual Surplus</h3>
                             <div className="text-4xl font-bold text-white mb-2">
                                 BDT {Math.round(result.surplus * 12).toLocaleString()}
                             </div>
@@ -224,7 +229,7 @@ export function Calculator() {
                                     style={{ width: `${Math.min(100, (result.surplus * 12 / 10000000) * 100)}%` }} // Normalized to 10M for visual
                                 />
                             </div>
-                            <p className="mt-2 text-xs text-gray-500">
+                            <p className="mt-2 text-xs text-gray-400">
                                 {isGrowthMode
                                     ? "Average annual surplus over 5-year growth trajectory."
                                     : `Based on ${selectedTier.name} projections. Surplus is distributed to investors, employees, and community.`
@@ -232,25 +237,25 @@ export function Calculator() {
                             </p>
                         </div>
 
-                        <div className="p-6 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md flex flex-col justify-center">
-                            <h3 className="text-gray-400 text-sm font-medium mb-1">Your Monthly Share</h3>
+                        <div className="p-6 rounded-2xl bg-gray-800/90 border border-gray-700 flex flex-col justify-center">
+                            <h3 className="text-gray-300 text-sm font-medium mb-1">Your Monthly Share</h3>
                             <div className="text-4xl font-bold text-white mb-2">
                                 BDT {Math.round(result.investorShareMonth).toLocaleString()}
                             </div>
                             <div className="h-1 w-full bg-gray-800 rounded-full overflow-hidden">
                                 <div
-                                    className="h-full bg-primary transition-all duration-500"
+                                    className="h-full bg-brand-base transition-all duration-500"
                                     style={{ width: `${Math.min(100, (result.investorShareMonth / 200000) * 100)}%` }} // Normalized to 200k
                                 />
                             </div>
-                            <p className="mt-2 text-xs text-gray-500">
+                            <p className="mt-2 text-xs text-gray-400">
                                 Paid out monthly or quarterly as per Article IX-B.
                             </p>
                         </div>
                     </div>
 
                     {/* NEW: Surplus Breakdown */}
-                    <div className="p-6 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md">
+                    <div className="p-6 rounded-2xl bg-gray-800/90 border border-gray-700">
                         <DistributionBreakdown
                             distribution={result.distribution}
                             totalSurplusMonthly={result.surplus}

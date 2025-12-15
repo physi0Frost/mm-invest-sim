@@ -118,7 +118,7 @@ export function DistributionBreakdown({ distribution, className }: DistributionB
                 {items.map((item) => (
                     <div
                         key={item.id}
-                        className="group relative p-3 rounded-xl border border-white/5 bg-white/5 hover:bg-white/10 transition-colors"
+                        className="group relative p-3 rounded-xl border border-gray-700 bg-gray-800/70 hover:bg-gray-700/80 transition-colors"
                     >
                         <div className="flex justify-between items-start mb-1">
                             <div className="flex items-center gap-2">

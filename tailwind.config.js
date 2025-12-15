@@ -26,6 +26,19 @@ export default {
                 border: "hsl(var(--border))",
                 input: "hsl(var(--input))",
                 ring: "hsl(var(--ring))",
+                // Motion Mechanics (Primary) - Professional Green
+                "brand-dark": "#0d4826",
+                "brand-base": "#167a42",
+                "brand-light": "#3cb06f",
+                "brand-extralight": "#e7f7ed",
+                // Purrfect Universe (Radical Highlights)
+                "brand-secondary": "#f97316", // Radical Orange
+                "brand-secondary-light": "#fdba74",
+                "brand-wood": "#854d0e", // Wood Brown
+                "brand-highlight": "#2563eb", // Highlight Blue
+                "brand-highlight-light": "#60a5fa",
+                "brand-red": "#ef4444",
+                "brand-red-light": "#f87171",
             },
         },
     },

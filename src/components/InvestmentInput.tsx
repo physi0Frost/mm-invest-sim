@@ -21,8 +21,8 @@ export function InvestmentInput({
         : FINANCIAL_CONSTANTS.FUNDING_GAP * 0.51; // Allow max 51% of total gap for Founders
 
     return (
-        <div className={cn("p-6 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md", className)}>
-            <h3 className="text-xl font-bold mb-4 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+        <div className={cn("p-6 rounded-2xl bg-gray-800/90 border border-gray-700", className)}>
+            <h3 className="text-xl font-bold mb-4 bg-gradient-to-r from-brand-light to-brand-base bg-clip-text text-transparent">
                 Investment Configuration
             </h3>
 
@@ -30,22 +30,26 @@ export function InvestmentInput({
             <div className="flex gap-2 mb-6 p-1 bg-black/20 rounded-lg">
                 <button
                     onClick={() => setInvestorType("EXTERNAL")}
+                    aria-pressed={investorType === "EXTERNAL"}
+                    aria-label="Select External Investor type"
                     className={cn(
                         "flex-1 py-2 rounded-md text-sm font-medium transition-all duration-300",
                         investorType === "EXTERNAL"
-                            ? "bg-primary text-white shadow-lg shadow-primary/25"
-                            : "text-muted-foreground hover:text-white"
+                            ? "bg-brand-base text-white shadow-lg shadow-brand-base/25"
+                            : "text-gray-300 hover:text-white hover:bg-gray-700/50"
                     )}
                 >
                     External Investor
                 </button>
                 <button
                     onClick={() => setInvestorType("FOUNDER")}
+                    aria-pressed={investorType === "FOUNDER"}
+                    aria-label="Select Founder type"
                     className={cn(
                         "flex-1 py-2 rounded-md text-sm font-medium transition-all duration-300",
                         investorType === "FOUNDER"
-                            ? "bg-primary text-white shadow-lg shadow-primary/25"
-                            : "text-muted-foreground hover:text-white"
+                            ? "bg-brand-base text-white shadow-lg shadow-brand-base/25"
+                            : "text-gray-300 hover:text-white hover:bg-gray-700/50"
                     )}
                 >
                     Founder
@@ -55,12 +59,14 @@ export function InvestmentInput({
             {/* Amount Input */}
             <div className="space-y-4">
                 <div className="flex justify-between items-center">
-                    <label className="text-sm text-gray-400">Investment Amount (BDT)</label>
+                    <label htmlFor="investment-amount" className="text-sm text-gray-300">Investment Amount (BDT)</label>
                     <input
+                        id="investment-amount"
                         type="number"
                         value={investment}
                         onChange={(e) => setInvestment(Number(e.target.value))}
-                        className="bg-black/40 border border-white/10 rounded-lg px-3 py-1 text-right font-mono text-lg focus:outline-none focus:border-primary/50 text-white"
+                        aria-label="Investment amount in BDT"
+                        className="bg-gray-900/60 border border-gray-600 rounded-lg px-3 py-1 text-right font-mono text-lg text-white"
                     />
                 </div>
 
@@ -71,10 +77,11 @@ export function InvestmentInput({
                     step={50000}
                     value={investment}
                     onChange={(e) => setInvestment(Number(e.target.value))}
-                    className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-primary hover:accent-primary/80 transition-all"
+                    aria-label="Investment amount slider"
+                    className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-brand-base hover:accent-brand-light transition-all"
                 />
 
-                <div className="flex justify-between text-xs text-gray-500">
+                <div className="flex justify-between text-xs text-gray-400">
                     <span>0 BDT</span>
                     <span>{maxInvestment.toLocaleString()} BDT</span>
                 </div>
