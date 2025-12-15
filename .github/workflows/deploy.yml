@@ -1,10 +1,10 @@
 name: Deploy to GitHub Pages
 
 on:
-  # Trigger on pushes to deploy branch
+  # Trigger on pushes to gh-pages branch
   push:
     branches:
-      - deploy
+      - gh-pages
   
   # Allow manual deployment from Actions tab
   workflow_dispatch:

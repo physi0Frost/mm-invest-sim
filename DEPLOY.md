@@ -4,7 +4,7 @@ This guide explains how to deploy the Motion Mechanics Investment Simulator to G
 
 ## 🚀 Quick Start
 
-The site automatically deploys to GitHub Pages when you push to the `deploy` branch. The deployment is handled by GitHub Actions.
+The site automatically deploys to GitHub Pages when you push to the `gh-pages` branch. The deployment is handled by GitHub Actions.
 
 **Live URL**: `https://<your-username>.github.io/<repository-name>/`
 
@@ -38,12 +38,12 @@ Ensure the workflow has proper permissions:
 
 ## 🔄 Automatic Deployment
 
-Every push to the `deploy` branch triggers an automatic deployment:
+Every push to the `gh-pages` branch triggers an automatic deployment:
 
 ```bash
 git add .
 git commit -m "Your commit message"
-git push origin deploy
+git push origin gh-pages
 ```
 
 **What happens:**
@@ -67,7 +67,7 @@ You can manually trigger a deployment without pushing code:
 1. Go to **Actions** tab in your repository
 2. Click on **Deploy to GitHub Pages** workflow
 3. Click **Run workflow** button
-4. Select the `deploy` branch
+4. Select the `gh-pages` branch
 5. Click **Run workflow**
 
 ---
@@ -106,7 +106,7 @@ Commit and push:
 ```bash
 git add public/CNAME
 git commit -m "Add custom domain"
-git push origin deploy
+git push origin gh-pages
 ```
 
 ### 4. Update Vite Config
@@ -230,7 +230,7 @@ Or revert the commit:
 
 ```bash
 git revert HEAD
-git push origin deploy
+git push origin gh-pages
 ```
 
 ---
@@ -302,4 +302,4 @@ If you encounter issues:
 
 ---
 
-**Next Steps**: Push your changes to `deploy` branch and watch your site go live! 🎉
+**Next Steps**: Push your changes to `gh-pages` branch and watch your site go live! 🎉
