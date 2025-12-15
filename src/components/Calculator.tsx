@@ -49,7 +49,18 @@ export function Calculator() {
                 <div className="lg:col-span-4 space-y-6">
                     {/* Scenario Selector */}
                     <div className="p-6 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md">
-                        <h3 className="text-sm font-semibold text-gray-300 mb-4 uppercase tracking-wider">Operational Scenario</h3>
+                        <div className="flex justify-between items-center mb-4">
+                            <h3 className="text-sm font-semibold text-gray-300 uppercase tracking-wider">Operational Scenario</h3>
+                            <a
+                                href="https://microsites.infra.purrfecthq.com/flextime/?h=747f34f9&lang=en"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-xs text-primary hover:text-primary/80 flex items-center gap-1 transition-colors"
+                            >
+                                <Sparkles className="w-3 h-3" />
+                                Model Microsite
+                            </a>
+                        </div>
                         <div className="space-y-3">
                             {TIERS.map((tier) => (
                                 <button
