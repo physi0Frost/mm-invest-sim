@@ -8,6 +8,17 @@ export interface CalculationResult {
     investorShareYear: number;
     yearsToReturn: number;
     roiYield: number;
+    distribution: {
+        employees: number;
+        founders: number;
+        investors: number;
+        sweatEquity: number;
+        treasury: number;
+        community: number;
+        reserves: number;
+    };
+    isGrowthMode?: boolean;
+    averageYield?: number;
 }
 
 export const calculateNetProfit = (tier: TierData): number => {
@@ -28,24 +39,35 @@ export const calculateInvestorReturn = (
     const netProfit = calculateNetProfit(tier);
     const surplus = calculateSurplus(tier, netProfit);
 
+    // Calculate total pool amounts (Annualized for distribution display)
+    const annualSurplus = surplus * 12;
+    const distribution = {
+        employees: annualSurplus * FINANCIAL_CONSTANTS.SURPLUS_SHARES.EMPLOYEES,
+        founders: annualSurplus * FINANCIAL_CONSTANTS.SURPLUS_SHARES.FOUNDERS,
+        investors: annualSurplus * FINANCIAL_CONSTANTS.SURPLUS_SHARES.EXTERNAL_INVESTORS,
+        sweatEquity: annualSurplus * FINANCIAL_CONSTANTS.SURPLUS_SHARES.SWEAT_EQUITY,
+        treasury: annualSurplus * FINANCIAL_CONSTANTS.SURPLUS_SHARES.TREASURY_RESERVE,
+        community: annualSurplus * FINANCIAL_CONSTANTS.SURPLUS_SHARES.COMMUNITY_FUND,
+        reserves: annualSurplus * FINANCIAL_CONSTANTS.SURPLUS_SHARES.RESERVES_DREAM,
+    };
+
     let poolShareConfig = FINANCIAL_CONSTANTS.SURPLUS_SHARES.EXTERNAL_INVESTORS;
     let totalPoolRequirement = FINANCIAL_CONSTANTS.FUNDING_GAP;
 
     if (investorType === "FOUNDER") {
         poolShareConfig = FINANCIAL_CONSTANTS.SURPLUS_SHARES.FOUNDERS;
-        totalPoolRequirement = FINANCIAL_CONSTANTS.ALREADY_COMMITTED; // Or should we assume Founders also scale? Docs say Committed 1.1M.
+        totalPoolRequirement = FINANCIAL_CONSTANTS.ALREADY_COMMITTED;
     }
-    // For Employee/Sweat, it's more complex (based on salary), but for this calculator we might treat it similarly for simplicity or add specific logic later.
 
-    // Total Surplus allocated to this POOL
-    const totalPoolSurplus = surplus * poolShareConfig;
+    // Total Surplus allocated to this POOL (Monthly)
+    const totalPoolSurplusMonthly = surplus * poolShareConfig;
 
     // Investor's ownership of the pool
     const ownershipPercentage = totalPoolRequirement > 0 ? investmentAmount / totalPoolRequirement : 0;
 
     // Investor's share of the surplus
-    const investorShareMonth = totalPoolSurplus * ownershipPercentage;
-    const investorShareYear = investorShareMonth * 12; // Simple annualized
+    const investorShareMonth = totalPoolSurplusMonthly * ownershipPercentage;
+    const investorShareYear = investorShareMonth * 12;
 
     const yearsToReturn = investorShareYear > 0 ? investmentAmount / investorShareYear : Infinity;
     const roiYield = investorShareYear > 0 ? (investorShareYear / investmentAmount) * 100 : 0;
@@ -57,44 +79,70 @@ export const calculateInvestorReturn = (
         investorShareYear,
         yearsToReturn,
         roiYield,
+        distribution,
     };
 };
 
 export const calculateGrowthProjection = (
     investmentAmount: number,
     investorType: "EXTERNAL" | "FOUNDER" = "EXTERNAL"
-): CalculationResult & { isGrowthMode: true; averageYield: number } => {
+): CalculationResult => {
     // Simulation: Year 1 (T0) -> Year 2 (T1) -> Year 3, 4, 5 (T2)
     const trajectory = ["tier-0", "tier-1", "tier-2", "tier-2", "tier-2"];
 
     let totalShare5Years = 0;
     let totalSurplus5Years = 0;
+    let totalDistribution = {
+        employees: 0,
+        founders: 0,
+        investors: 0,
+        sweatEquity: 0,
+        treasury: 0,
+        community: 0,
+        reserves: 0,
+    };
 
     trajectory.forEach((tierId) => {
         const tier = TIERS.find((t) => t.id === tierId) || TIERS[0];
         const result = calculateInvestorReturn(investmentAmount, tier, investorType);
         totalShare5Years += result.investorShareYear;
         totalSurplus5Years += (result.surplus * 12);
+
+        // Sum distributions
+        totalDistribution.employees += result.distribution.employees;
+        totalDistribution.founders += result.distribution.founders;
+        totalDistribution.investors += result.distribution.investors;
+        totalDistribution.sweatEquity += result.distribution.sweatEquity;
+        totalDistribution.treasury += result.distribution.treasury;
+        totalDistribution.community += result.distribution.community;
+        totalDistribution.reserves += result.distribution.reserves;
     });
 
     const averageShareYear = totalShare5Years / 5;
     const averageSurplusYear = totalSurplus5Years / 5;
 
-    // Break-even: simpler to just use average? 
-    // No, let's just use the average for the "Card" display to be consistent.
-    // Or we could be precise: if (Year1 > Inv) ... else if (Year1+Year2 > Inv)...
-    // For now, average is a good "Projection".
+    // Average distribution
+    const averageDistribution = {
+        employees: totalDistribution.employees / 5,
+        founders: totalDistribution.founders / 5,
+        investors: totalDistribution.investors / 5,
+        sweatEquity: totalDistribution.sweatEquity / 5,
+        treasury: totalDistribution.treasury / 5,
+        community: totalDistribution.community / 5,
+        reserves: totalDistribution.reserves / 5,
+    };
 
     const yearsToReturn = averageShareYear > 0 ? investmentAmount / averageShareYear : Infinity;
     const roiYield = averageShareYear > 0 ? (averageShareYear / investmentAmount) * 100 : 0;
 
     return {
-        netProfit: 0, // Not really applicable for mixed mode, maybe use T2 (Ending state)?
-        surplus: averageSurplusYear / 12, // Average monthly surplus
+        netProfit: 0,
+        surplus: averageSurplusYear / 12,
         investorShareMonth: averageShareYear / 12,
         investorShareYear: averageShareYear,
         yearsToReturn,
         roiYield,
+        distribution: averageDistribution,
         isGrowthMode: true,
         averageYield: roiYield
     };

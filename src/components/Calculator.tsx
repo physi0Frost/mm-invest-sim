@@ -6,6 +6,7 @@ import { TIERS } from "../data/financials";
 import { calculateInvestorReturn, calculateGrowthProjection } from "../lib/calculator";
 import { cn } from "../lib/utils";
 import { Info, Sparkles } from "lucide-react";
+import { DistributionBreakdown } from "./DistributionBreakdown";
 
 export function Calculator() {
     const [investment, setInvestment] = useState<number>(100000);
@@ -113,6 +114,8 @@ export function Calculator() {
                 <div className="lg:col-span-8 space-y-6">
                     <ResultsCards result={result} />
 
+
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="p-6 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md flex flex-col justify-center">
                             <h3 className="text-gray-400 text-sm font-medium mb-1">Projected Annual Surplus</h3>
@@ -148,6 +151,14 @@ export function Calculator() {
                                 Paid out monthly or quarterly as per Article IX-B.
                             </p>
                         </div>
+                    </div>
+
+                    {/* NEW: Surplus Breakdown */}
+                    <div className="p-6 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md">
+                        <DistributionBreakdown
+                            distribution={result.distribution}
+                            totalSurplusMonthly={result.surplus}
+                        />
                     </div>
 
                     <ValuationChart
